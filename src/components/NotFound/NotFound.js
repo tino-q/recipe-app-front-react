@@ -1,11 +1,10 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
+import { Redirect } from "react-router-dom";
+import { AuthContext } from '@contexts/AuthContext';
 
 const NotFound = () => {
-  return (
-    <div>
-      NotFound
-    </div>
-  );
+  const auth = useContext(AuthContext);
+  return <Redirect to={{ pathname: auth.me ? '/home' : '/login' }} />;
 }
 
 export default memo(NotFound);

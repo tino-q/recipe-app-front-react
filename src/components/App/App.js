@@ -1,46 +1,63 @@
-import React, { useContext } from 'react';
-import Signup from '@components/Signup';
+import React, { memo, useState } from 'react';
+import { AuthProvider } from '@contexts/AuthContext';
+import { ThemeProvider } from 'styled-components';
+import { HomeProvider } from '@contexts/HomeContext';
+import SignUp from '@components/SignUp';
 import NotFound from '@components/NotFound';
 import Login from '@components/Login';
 import Home from '@components/Home';
+import NavBar from '@components/NavBar';
 import styled from 'styled-components';
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
 } from "react-router-dom";
 
-const Root = styled.div`
-  background: rgba(155,155,155, 0.5);
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+const AppRoot = styled.div`
+  width: 100%;
+  height: 100%;
 `;
 
-const Banner = styled.div`
-  font-size: 30px;
-  margin: 10px;
+const Border = styled.div`
+  border-top: 2px solid black;
 `;
 
-// import { AuthContext } from '@contexts/AuthContext';
-// const { loggedIn, toggleLoggedIn } = useContext(AuthContext);
+
+const DEFAULT_THEME = {
+  dark: false
+};
+
+const Contexts = memo((props) => {
+  const [theme, setTheme] = useState(DEFAULT_THEME);
+  return (
+    <ThemeProvider theme={{ theme, setTheme }}>
+      <AuthProvider>
+        <HomeProvider>
+          {props.children}
+        </HomeProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+});
 
 function App() {
   return (
-    <Root>
-      <Banner> Recipes! </Banner>
-      <Router>
-        <Switch>
-          <Route exact path='/login' component={Login} />
-          <Route exact path='/home' component={Home} />
-          <Route exact path='/signup' component={Signup} />
-          <Route component={NotFound} />
-        </Switch>
-      </Router>
-    </Root>
+    <AppRoot>
+      <Contexts>
+        <NavBar />
+        <Border>
+          <Router>
+            <Switch>
+              <Route exact path='/login' component={Login} />
+              <Route exact path='/home' component={Home} />
+              <Route exact path='/SignUp' component={SignUp} />
+              <Route component={NotFound} />
+            </Switch>
+          </Router >
+        </Border>
+      </Contexts>
+    </AppRoot>
   );
 }
 
