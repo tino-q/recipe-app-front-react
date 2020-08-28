@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Spinner from '@components/Spinner';
+import Emoji from '@components/Emoji';
 import { HomeContext } from '@contexts/HomeContext';
-// import styled from 'styled-components';
-import RecipeItem from './RecipeItem';
+import EditableRecipeItem from './EditableRecipeItem';
 import RecipeEditor from './RecipeEditor';
 import styled from 'styled-components';
 import useToggleState from '@hooks/useToggleState';
@@ -33,12 +33,43 @@ const CenteredContainer = styled.div`
     min-height: 25px;
     width: 100%;
     justify-content: center;
+    flex-direction: column;
+`;
+
+const ButtonContainer = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+`;
+
+
+const RECIPE_CREATION_PLACEHOLDER = {
+    title: 'New recipe',
+    time_minutes: 0,
+    price: 0,
+    link: '',
+    ingredients: [],
+    tags: []
+}
+
+
+const RecipeCreationButtons = styled.div`
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+`;
+
+const Button = styled(Emoji)`
+    &:hover {
+        cursor: pointer;
+    }
 `;
 
 
 const RecipesCRUD = () => {
     const home = useContext(HomeContext);
-    const [isEditing, toggleIsEditing] = useToggleState(false);
+    const [isCreatingRecipe, toggleIsCreatingRecipe] = useToggleState(false);
+    const [recipeForCreation, setRecipeForCreation] = useState(RECIPE_CREATION_PLACEHOLDER)
 
     if (home.loading || !home.recipes) {
         return <Spinner />
@@ -46,31 +77,35 @@ const RecipesCRUD = () => {
 
     return (
         <Root>
-            <Container>
-                <CenteredContainer>
-                    {
-                        !isEditing ?
-                            <div style={{ width: "100%", display: 'flex', justifyContent: 'space-between' }}>
-                                <button onClick={() => home.fetchRecipes()}>Refresh</button>
-                                <button onClick={toggleIsEditing}>{`Create new Recipe`}</button>
-                            </div> :
-                            <RecipeEditor
-                                tag="Recipe"
-                                onSubmit={home.createRecipe}
-                                placeholder={'eg: chicken pasta'}
-                                onCancel={toggleIsEditing}
-                            />
-                    }
-                </CenteredContainer>
-            </Container>
+            {
+                !isCreatingRecipe ?
+                    <CenteredContainer>
+                        <ButtonContainer>
+                            <button onClick={home.fetchRecipes}>Refresh</button>
+                            <button onClick={toggleIsCreatingRecipe}>{`Create new Recipe`}</button>
+                        </ButtonContainer>
+                    </CenteredContainer> :
+                    <CenteredContainer>
+                        <RecipeCreationButtons>
+                            <Button label="Create" onClick={() => toggleIsCreatingRecipe() ^ home.createRecipe(recipeForCreation)} emoji="💾" />
+                            <Button label="Cancel" onClick={toggleIsCreatingRecipe} emoji="❌" />
+                        </RecipeCreationButtons>
+                        <EditableRecipeItem
+                            recipe={recipeForCreation}
+                            tags={home.tags}
+                            ingredients={home.ingredients}
+                            patchRecipe={(_, params) => setRecipeForCreation({ ...recipeForCreation, ...params })}
+                        />
+
+                    </CenteredContainer>
+            }
             <List>
                 {home.recipes.map(recipe => (
-                    <RecipeItem
-                        key={recipe.id}
+                    <EditableRecipeItem
                         recipe={recipe}
-                        onEdit={updatedRecipe => {
-                            debugger;
-                        }}
+                        tags={home.tags}
+                        ingredients={home.ingredients}
+                        patchRecipe={home.patchRecipe}
                         onDelete={() => home.deleteRecipe(recipe)}
                     />
                 ))}

@@ -86,6 +86,20 @@ export function homeReducer(state, action) {
                 error: null,
             }
         }
+        case 'RECIPE_DELETED': {
+            return {
+                ...state,
+                recipes: state.recipes.filter(recipe => recipe.id !== action.recipeId),
+                error: null,
+            }
+        }
+        case 'RECIPE_CREATED': {
+            return {
+                ...state,
+                recipes: [...state.recipes, action.recipe],
+                error: null,
+            }
+        }
         default:
             throw new Error(`Unknown homeReducer action ${action.type}`);
     }
@@ -103,5 +117,7 @@ export const homeActions = {
     ingredientCreated: ingredient => ({ type: 'INGREDIENT_CREATED', ingredient }),
     ingredientDeleted: ingredientId => ({ type: 'INGREDIENT_DELETED', ingredientId }),
     tagUpdated: updatedTag => ({ type: 'TAG_UPDATED', updatedTag }),
-    recipeUpdated: updatedRecipe => ({ type: 'RECIPE_UPDATED', updatedRecipe })
+    recipeUpdated: updatedRecipe => ({ type: 'RECIPE_UPDATED', updatedRecipe }),
+    recipeDeleted: recipeId => ({ type: 'RECIPE_DELETED', recipeId }),
+    recipeCreated: recipe => ({ type: 'RECIPE_CREATED', recipe }),
 };

@@ -92,13 +92,18 @@ export function HomeProvider(props) {
         })
     );
 
-    const updateTags = recipe => selectedIds =>
-        doWhileLoading(() => recipes.updateTags(auth.token, recipe.id, selectedIds)
+
+
+    const patchRecipe = (recipe, params) =>
+        doWhileLoading(() => recipes.patchRecipe(auth.token, recipe.id, params)
             .then(updatedRecipe => dispatch(homeActions.recipeUpdated(updatedRecipe))));
 
-    const updateIngredients = recipe => selectedIds =>
-        doWhileLoading(() => recipes.updateIngredients(auth.token, recipe.id, selectedIds)
-            .then(updatedRecipe => dispatch(homeActions.recipeUpdated(updatedRecipe))));
+    const deleteRecipe = recipe =>
+        doWhileLoading(() => recipes.deleteRecipe(auth.token, recipe.id)
+            .then(() => dispatch(homeActions.recipeDeleted(recipe.id))));
+
+    const createRecipe = recipe => doWhileLoading(() => recipes.createRecipe(auth.token, recipe)
+        .then((createdRecipe) => dispatch(homeActions.recipeCreated(createdRecipe))))
 
     useEffect(() => {
         if (
@@ -124,8 +129,9 @@ export function HomeProvider(props) {
             deleteTag,
             deleteIngredient,
             editTag,
-            updateTags,
-            updateIngredients,
+            patchRecipe,
+            deleteRecipe,
+            createRecipe
         }}>
             {props.children}
         </HomeContext.Provider>

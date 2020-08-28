@@ -142,33 +142,6 @@ export async function createIngredient(token, name) {
     }
 }
 
-export async function createRecipe(token, recipe) {
-    try {
-        const { data } = await backend.post('/recipe/ingredients/', {
-            title: recipe.title,
-            ingredients: recipe.ingredientIds,
-            tags: recipe.tagIds,
-            time_minutes: recipe.time_minutes,
-            price: recipe.price
-
-        }, {
-            headers: {
-                'Authorization': `Token ${token}`
-            }
-        });
-        return data;
-    } catch (e) {
-        const status = e?.response?.status;
-        if (status >= 400 && status < 500)
-            throw ERRORS.INVALID_CREDENTIALS;
-
-        throw ERRORS.UNKNOWN_ERROR;
-    }
-}
-
-
-
-
 export async function deleteTag(token, tagId) {
     try {
         console.log('deleteTag', tagId);
@@ -192,6 +165,45 @@ export async function deleteIngredient(token, ingredientId) {
     try {
         console.log('deleteIngredient', ingredientId);
         const { data } = await backend.delete(`/recipe/ingredients/${ingredientId}/`, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+export async function createRecipe(token, recipe) {
+    try {
+        console.log('createRecipe', JSON.stringify({ recipe }));
+        const { data } = await backend.post(`/recipe/recipes/`, recipe, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+
+export async function deleteRecipe(token, recipeId) {
+    try {
+        console.log('deleteRecipe', recipeId);
+        const { data } = await backend.delete(`/recipe/recipes/${recipeId}/`, {
             headers: {
                 'Authorization': `Token ${token}`
             }
@@ -283,31 +295,10 @@ export async function changePassword(token, newPassword) {
     }
 }
 
-
-
-export async function updateTags(token, recipeId, selectedIds) {
+export async function patchRecipe(token, recipeId, params) {
     try {
-        console.log('updateTags', recipeId, selectedIds);
-        const { data } = await backend.patch(`/recipe/recipes/${recipeId}/`, { tags: selectedIds }, {
-            headers: {
-                'Authorization': `Token ${token}`
-            }
-        });
-        return data;
-    } catch (e) {
-        const status = e?.response?.status;
-        if (status >= 400 && status < 500)
-            throw ERRORS.INVALID_CREDENTIALS;
-
-        throw ERRORS.UNKNOWN_ERROR;
-    }
-}
-
-
-export async function updateIngredients(token, recipeId, selectedIds) {
-    try {
-        console.log('updateIngredients', recipeId, selectedIds);
-        const { data } = await backend.patch(`/recipe/recipes/${recipeId}/`, { ingredients: selectedIds }, {
+        console.log('patchRecipe', recipeId, JSON.stringify({ params }));
+        const { data } = await backend.patch(`/recipe/recipes/${recipeId}/`, params, {
             headers: {
                 'Authorization': `Token ${token}`
             }
