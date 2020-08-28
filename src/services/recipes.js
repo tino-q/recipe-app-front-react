@@ -141,3 +141,183 @@ export async function createIngredient(token, name) {
         throw ERRORS.UNKNOWN_ERROR;
     }
 }
+
+export async function createRecipe(token, recipe) {
+    try {
+        const { data } = await backend.post('/recipe/ingredients/', {
+            title: recipe.title,
+            ingredients: recipe.ingredientIds,
+            tags: recipe.tagIds,
+            time_minutes: recipe.time_minutes,
+            price: recipe.price
+
+        }, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+
+
+export async function deleteTag(token, tagId) {
+    try {
+        console.log('deleteTag', tagId);
+        const { data } = await backend.delete(`/recipe/tags/${tagId}/`, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+export async function deleteIngredient(token, ingredientId) {
+    try {
+        console.log('deleteIngredient', ingredientId);
+        const { data } = await backend.delete(`/recipe/ingredients/${ingredientId}/`, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+export async function editTag(token, tagId, newValue) {
+    try {
+        console.log('editTag', tagId);
+        const { data } = await backend.patch(`/recipe/tags/${tagId}/`, { name: newValue }, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+export async function changeName(token, newName) {
+    try {
+        console.log('changeName', newName);
+        const { data } = await backend.patch(`/user/me/`, { name: newName }, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+
+export async function changeEmail(token, newEmail) {
+    try {
+        console.log('changeEmail', newEmail);
+        const { data } = await backend.patch(`/user/me/`, { email: newEmail }, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+export async function changePassword(token, newPassword) {
+    try {
+        console.log('changePassword', newPassword);
+        const { data } = await backend.patch(`/user/me/`, { password: newPassword }, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+
+export async function updateTags(token, recipeId, selectedIds) {
+    try {
+        console.log('updateTags', recipeId, selectedIds);
+        const { data } = await backend.patch(`/recipe/recipes/${recipeId}/`, { tags: selectedIds }, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}
+
+
+export async function updateIngredients(token, recipeId, selectedIds) {
+    try {
+        console.log('updateIngredients', recipeId, selectedIds);
+        const { data } = await backend.patch(`/recipe/recipes/${recipeId}/`, { ingredients: selectedIds }, {
+            headers: {
+                'Authorization': `Token ${token}`
+            }
+        });
+        return data;
+    } catch (e) {
+        const status = e?.response?.status;
+        if (status >= 400 && status < 500)
+            throw ERRORS.INVALID_CREDENTIALS;
+
+        throw ERRORS.UNKNOWN_ERROR;
+    }
+}

@@ -10,6 +10,7 @@ const CenteredContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: 5px;
 `;
 
 const Banner = styled.div`
@@ -27,7 +28,7 @@ const ErrorMessage = styled.div`
 
 const LinkToSignUp = styled(Link)`
   margin-top: 10px;
-  font-size: 10px;
+  font-size: 12px;
 `;
 
 const Login = (props) => {
@@ -36,20 +37,20 @@ const Login = (props) => {
   const [password, onPasswordChange] = useInputState();
 
   if (auth.me) {
-    return <Redirect to={{ pathname: '/home' }} />
+    return <Redirect to={{ pathname: '/recipes' }} />
   } else if (auth.loading) {
     return <Spinner />
   }
 
   return (
     <CenteredContainer>
-      <Banner>Log in with your credentials!</Banner>
+      <Banner>Log in with your credentials</Banner>
       <form onSubmit={e => e.preventDefault() ^ auth.logIn(email, password)}>
         <CenteredContainer>
           <Input type="text" name="email" value={email} onChange={onEmailChange} placeholder="email" />
           <Input type="password" name="password" value={password} onChange={onPasswordChange} placeholder="password" />
           <Input type="submit" value="Confirm" disabled={!(password && email)} />
-          <LinkToSignUp to="/SignUp">Don't have an account? Sign up for free</LinkToSignUp>
+          <LinkToSignUp to="/signup">Don't have an account? Sign up for free</LinkToSignUp>
           <ErrorMessage error={auth.error === ERRORS.INVALID_CREDENTIALS}>Oh snap, that's no good. Try again</ErrorMessage>
         </CenteredContainer>
       </form>

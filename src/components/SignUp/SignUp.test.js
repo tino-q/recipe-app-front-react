@@ -43,7 +43,7 @@ test('Should redirect to home if me and token available', () => {
     </AuthContext.Provider>
   );
 
-  expect(history.location.pathname).toEqual('/home');
+  expect(history.location.pathname).toEqual('/recipes');
 });
 
 

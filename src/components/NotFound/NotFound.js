@@ -4,7 +4,7 @@ import { AuthContext } from '@contexts/AuthContext';
 
 const NotFound = () => {
   const auth = useContext(AuthContext);
-  return <Redirect to={{ pathname: auth.me ? '/home' : '/login' }} />;
+  return <Redirect to={{ pathname: auth.me ? '/recipes' : '/login' }} />;
 }
 
 export default memo(NotFound);

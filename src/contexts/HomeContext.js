@@ -1,22 +1,24 @@
 import React, { createContext, useReducer, useEffect, useContext } from 'react';
 import { homeReducer, homeActions } from '@reducers/home';
 import * as recipes from '@services/recipes';
-import Recipes from '@components/Recipes';
+import RecipesCRUD from '@components/RecipesCRUD';
 import { AuthContext } from '@contexts/AuthContext';
 import Tags from '@components/Tags';
 import Ingredients from '@components/Ingredients';
 
-
 export const TABS = {
     RECIPES: {
+        path: '/recipes',
         text: 'Recipes',
-        Component: Recipes,
+        Component: RecipesCRUD,
     },
     INGREDIENTS: {
+        path: '/ingredients',
         text: 'Ingredients',
         Component: Ingredients,
     },
     TAGS: {
+        path: '/tags',
         text: 'Tags',
         Component: Tags,
     }
@@ -26,12 +28,12 @@ export const HomeContext = createContext();
 
 export function HomeProvider(props) {
     const auth = useContext(AuthContext);
+
     const [state, dispatch] = useReducer(homeReducer, {
         loading: false,
         recipes: null,
         tags: null,
         ingredients: null,
-        selectedTab: 'RECIPES'
     });
 
     const doWhileLoading = (promiseFn) =>
@@ -40,19 +42,44 @@ export function HomeProvider(props) {
             .then(() => dispatch(homeActions.setLoading(false)))
             .catch(error => dispatch(homeActions.setError(error)))
 
-    const fetchRecipes = token => doWhileLoading(
-        () => recipes.getRecipes(token)
+    const fetchRecipes = () => doWhileLoading(
+        () => recipes.getRecipes(auth.token)
             .then(recipes => dispatch(homeActions.setRecipes(recipes)))
     );
 
-    const fetchIngredients = token => doWhileLoading(
-        () => recipes.getIngredients(token)
+    const fetchIngredients = () => doWhileLoading(
+        () => recipes.getIngredients(auth.token)
             .then(ingredients => dispatch(homeActions.setIngredients(ingredients)))
     );
 
-    const fetchTags = token => doWhileLoading(
-        () => recipes.getTags(token)
+    const fetchTags = () => doWhileLoading(
+        () => recipes.getTags(auth.token)
             .then(tags => dispatch(homeActions.setTags(tags)))
+    );
+
+    const createTag = (name) => doWhileLoading(
+        () => recipes.createTag(auth.token, name)
+            .then(tag => dispatch(homeActions.tagCreated(tag)))
+    );
+
+    const deleteTag = (tag) => doWhileLoading(
+        () => recipes.deleteTag(auth.token, tag.id)
+            .then(() => dispatch(homeActions.tagDeleted(tag.id)))
+    );
+
+    const createIngredient = (name) => doWhileLoading(
+        () => recipes.createIngredient(auth.token, name)
+            .then(ingredient => dispatch(homeActions.ingredientCreated(ingredient)))
+    );
+
+    const deleteIngredient = ingredient => doWhileLoading(
+        () => recipes.deleteIngredient(auth.token, ingredient.id)
+            .then(() => dispatch(homeActions.ingredientDeleted(ingredient.id)))
+    );
+
+    const editTag = (tag, newValue) => doWhileLoading(
+        () => recipes.editTag(auth.token, tag.id, newValue)
+            .then(updatedTag => dispatch(homeActions.tagUpdated(updatedTag)))
     );
 
     const fetchAll = token => doWhileLoading(
@@ -65,31 +92,24 @@ export function HomeProvider(props) {
         })
     );
 
+    const updateTags = recipe => selectedIds =>
+        doWhileLoading(() => recipes.updateTags(auth.token, recipe.id, selectedIds)
+            .then(updatedRecipe => dispatch(homeActions.recipeUpdated(updatedRecipe))));
+
+    const updateIngredients = recipe => selectedIds =>
+        doWhileLoading(() => recipes.updateIngredients(auth.token, recipe.id, selectedIds)
+            .then(updatedRecipe => dispatch(homeActions.recipeUpdated(updatedRecipe))));
 
     useEffect(() => {
-        if (!state.loading && state.recipes === null && state.ingredients === null && state.tags === null)
+        if (
+            auth.token &&
+            !state.loading &&
+            state.recipes === null &&
+            state.ingredients === null &&
+            state.tags === null
+        )
             fetchAll(auth.token);
-    })
-
-    //const fetchRecipes = (token) => Promise.resolve(dispatch(homeActions.setLoading(true)))
-    //    .then(() => recipes.getRecipes(token))
-    //    .then(recipes => dispatch(homeActions.setRecipes(recipes)))
-    //    .then(() => dispatch(homeActions.setLoading(false)))
-    //    .catch(error => dispatch(homeActions.error(error)));
-    //
-    //const fetchIngredients = (token) => Promise.resolve(dispatch(homeActions.setLoading(true)))
-    //    .then(() => recipes.getIngredients(token))
-    //    .then(ingredients => dispatch(homeActions.setIngredients(ingredients)))
-    //    .then(() => dispatch(homeActions.setLoading(false)))
-    //    .catch(error => dispatch(homeActions.error(error)));
-    //
-    //const fetchTags = (token) => Promise.resolve(dispatch(homeActions.setLoading(true)))
-    //    .then(() => recipes.getTags(token))
-    //    .then(tags => dispatch(homeActions.setTags(tags)))
-    //    .then(() => dispatch(homeActions.setLoading(false)))
-    //    .catch(error => dispatch(homeActions.error(error)));
-
-
+    });
 
     return (
         <HomeContext.Provider value={{
@@ -99,6 +119,13 @@ export function HomeProvider(props) {
             fetchRecipes,
             fetchIngredients,
             fetchTags,
+            createTag,
+            createIngredient,
+            deleteTag,
+            deleteIngredient,
+            editTag,
+            updateTags,
+            updateIngredients,
         }}>
             {props.children}
         </HomeContext.Provider>

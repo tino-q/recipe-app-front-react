@@ -1,25 +1,22 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import Spinner from '@components/Spinner';
-import { AuthContext } from '@contexts/AuthContext';
+import TextCRUD from '@components/TextCRUD';
 import { HomeContext } from '@contexts/HomeContext';
 
-const Ingredients = (props) => {
-    const auth = useContext(AuthContext);
+const Ingredients = () => {
     const home = useContext(HomeContext);
 
-
-    useEffect(() => {
-        if (!home.ingredients) {
-            home.fetchIngredients(auth.token);
-        }
-    });
-
-
-    if (home.loading || !home.ingredients) {
+    if (home.loading) {
         return <Spinner />
     }
 
-    return <div {...props}> {JSON.stringify(home.ingredients)} </div>;
+    return <TextCRUD
+        tag={'ingredient'}
+        onCreate={home.createIngredient}
+        onDelete={home.deleteIngredient}
+        items={home.ingredients}
+        placeholder={'eg: carrots'}
+    />
 }
 
 export default Ingredients;

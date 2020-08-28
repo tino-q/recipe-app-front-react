@@ -1,25 +1,24 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import Spinner from '@components/Spinner';
-import { AuthContext } from '@contexts/AuthContext';
+import TextCRUD from '@components/TextCRUD';
 import { HomeContext } from '@contexts/HomeContext';
 
-const Tags = (props) => {
-    const auth = useContext(AuthContext);
+const Tags = () => {
     const home = useContext(HomeContext);
 
-
-    useEffect(() => {
-        if (!home.tags) {
-            home.fetchTags(auth.token);
-        }
-    });
-
-
-    if (home.loading || !home.tags) {
+    if (home.loading) {
         return <Spinner />
     }
 
-    return <div {...props}> {JSON.stringify(home.tags)} </div>;
+    return <TextCRUD
+        items={home.tags}
+        onCreate={home.createTag}
+        onDelete={home.deleteTag}
+        onRefresh={home.fetchTags}
+        onEdit={home.editTag}
+        placeholder='eg: vegan'
+        tag='tag'
+    />
 }
 
 export default Tags;

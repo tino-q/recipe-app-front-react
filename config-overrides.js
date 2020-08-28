@@ -5,6 +5,7 @@ module.exports = override(
     addWebpackAlias({
         ['@components']: path.resolve(__dirname, './src/components'),
         ['@contexts']: path.resolve(__dirname, './src/contexts'),
+        ['@helpers']: path.resolve(__dirname, './src/helpers'),
         ['@errors']: path.resolve(__dirname, './src/errors'),
         ['@hooks']: path.resolve(__dirname, './src/hooks'),
         ['@reducers']: path.resolve(__dirname, './src/reducers'),

@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 import IconButton from '@material-ui/core/IconButton';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -29,6 +30,7 @@ const UserName = styled.div`
 
 
 const NavBar = () => {
+  const history = useHistory();
   const auth = useContext(AuthContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -38,12 +40,17 @@ const NavBar = () => {
   const handleClose = () => setAnchorEl(null);
 
   const onClickProfile = () => {
-    alert('Profile not yet implemented');
+    history.push('profile');
     handleClose();
   };
 
   const onClickLogOut = () => {
     auth.logOut();
+    handleClose();
+  }
+
+  const onClickHome = () => {
+    history.push('/');
     handleClose();
   }
 
@@ -79,6 +86,7 @@ const NavBar = () => {
               open={open}
               onClose={handleClose}
             >
+              <MenuItem onClick={onClickHome}>Home</MenuItem>
               <MenuItem onClick={onClickProfile}>Profile</MenuItem>
               <MenuItem onClick={onClickLogOut}>Log out</MenuItem>
             </Menu>

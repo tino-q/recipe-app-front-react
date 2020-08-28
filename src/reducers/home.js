@@ -1,11 +1,6 @@
 
 export function homeReducer(state, action) {
     switch (action.type) {
-        case 'CHANGE_TAB':
-            return {
-                ...state,
-                selectedTab: action.tab
-            };
         case 'SET_LOADING':
             return {
                 ...state,
@@ -44,17 +39,69 @@ export function homeReducer(state, action) {
                 error: null,
             }
         }
+        case 'INGREDIENT_CREATED': {
+            return {
+                ...state,
+                ingredients: [...state.ingredients, action.ingredient],
+                error: null,
+            }
+        }
+        case 'TAG_CREATED': {
+            return {
+                ...state,
+                tags: [...state.tags, action.tag],
+                error: null,
+            }
+        }
+        case 'TAG_DELETED': {
+            return {
+                ...state,
+                tags: state.tags.filter(tag => tag.id !== action.tagId),
+                error: null,
+            }
+        }
+        case 'TAG_UPDATED': {
+            return {
+                ...state,
+                tags: state.tags.map(tag => (tag.id === action.updatedTag.id) ?
+                    ({ ...tag, name: action.updatedTag.name }) :
+                    ({ ...tag })
+                ),
+                error: null,
+            }
+        }
+        case 'INGREDIENT_DELETED': {
+            return {
+                ...state,
+                ingredients: state.ingredients.filter(i => i.id !== action.ingredientId),
+                error: null,
+            }
+        }
+        case 'RECIPE_UPDATED': {
+            return {
+                ...state,
+                recipes: state.recipes.map(
+                    recipe => recipe.id === action.updatedRecipe.id ? action.updatedRecipe : recipe
+                ),
+                error: null,
+            }
+        }
         default:
             throw new Error(`Unknown homeReducer action ${action.type}`);
     }
 }
 
 export const homeActions = {
-    changeTab: tab => ({ type: 'CHANGE_TAB', tab }),
     setRecipes: (recipes) => ({ type: 'SET_RECIPES', recipes }),
     setIngredients: (ingredients) => ({ type: 'SET_INGREDIENTS', ingredients }),
     setTags: (tags) => ({ type: 'SET_TAGS', tags }),
     setLoading: (loading) => ({ type: 'SET_LOADING', loading }),
     setError: (error) => ({ type: 'SET_ERROR', error }),
-    setAll: (recipes, ingredients, tags) => ({ type: 'SET_ALL', recipes, ingredients, tags })
+    setAll: (recipes, tags, ingredients) => ({ type: 'SET_ALL', recipes, ingredients, tags }),
+    tagCreated: tag => ({ type: 'TAG_CREATED', tag }),
+    tagDeleted: tagId => ({ type: 'TAG_DELETED', tagId }),
+    ingredientCreated: ingredient => ({ type: 'INGREDIENT_CREATED', ingredient }),
+    ingredientDeleted: ingredientId => ({ type: 'INGREDIENT_DELETED', ingredientId }),
+    tagUpdated: updatedTag => ({ type: 'TAG_UPDATED', updatedTag }),
+    recipeUpdated: updatedRecipe => ({ type: 'RECIPE_UPDATED', updatedRecipe })
 };

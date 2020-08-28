@@ -24,14 +24,14 @@ const Input = styled.input`
 
 const LinkToLogin = styled(Link)`
   margin-top: 10px;
-  font-size: 10px;
+  font-size: 12px;
 `;
 
 const SignUp = () => {
   const history = useHistory();
   const auth = useContext(AuthContext);
-  const [name, onNameChange] = useInputState('tq');
-  const [email, onEmailChange] = useInputState(`user-${Math.floor(Math.random() * 999)}@travelperk.com`);
+  const [name, onNameChange] = useInputState('Martin Queija');
+  const [email, onEmailChange] = useInputState('user@travelperk.com');
   const [password, onPasswordChange] = useInputState('password123');
 
   const onSubmitForm = e => {
@@ -45,7 +45,7 @@ const SignUp = () => {
   };
 
   if (auth.me) {
-    return <Redirect to={{ pathname: '/home' }} />
+    return <Redirect to={{ pathname: '/recipes' }} />
   }
 
   return (
