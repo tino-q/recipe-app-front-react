@@ -1,24 +1,11 @@
 import React, { useContext, useState } from 'react';
 import Spinner from '@components/Spinner';
-import Emoji from '@components/Emoji';
+import EmojiButton from '@components/EmojiButton';
+import Button from '@components/Button';
 import { HomeContext } from '@contexts/HomeContext';
 import EditableRecipeItem from './EditableRecipeItem';
-import RecipeEditor from './RecipeEditor';
 import styled from 'styled-components';
 import useToggleState from '@hooks/useToggleState';
-
-const List = styled.div`
-    display: flex;
-    flex-direction: column;
-`;
-
-const Container = styled.div`
-    display: flex;
-    min-height: 25px;
-    margin-top: 25px;
-    width: 100%;
-    justify-content: center;
-`;
 
 const Root = styled.div`
     display: flex;
@@ -30,7 +17,6 @@ const Root = styled.div`
 
 const CenteredContainer = styled.div`
     display: flex;
-    min-height: 25px;
     width: 100%;
     justify-content: center;
     flex-direction: column;
@@ -59,12 +45,6 @@ const RecipeCreationButtons = styled.div`
     margin-top: 5px;
 `;
 
-const Button = styled(Emoji)`
-    &:hover {
-        cursor: pointer;
-    }
-`;
-
 
 const RecipesCRUD = () => {
     const home = useContext(HomeContext);
@@ -81,35 +61,39 @@ const RecipesCRUD = () => {
                 !isCreatingRecipe ?
                     <CenteredContainer>
                         <ButtonContainer>
-                            <button onClick={home.fetchRecipes}>Refresh</button>
-                            <button onClick={toggleIsCreatingRecipe}>{`Create new Recipe`}</button>
+                            <Button onClick={home.fetch?.recipes}>Refresh</Button>
+                            <Button onClick={toggleIsCreatingRecipe}>{`Create new Recipe`}</Button>
                         </ButtonContainer>
                     </CenteredContainer> :
                     <CenteredContainer>
                         <RecipeCreationButtons>
-                            <Button label="Create" onClick={() => toggleIsCreatingRecipe() ^ home.createRecipe(recipeForCreation)} emoji="💾" />
-                            <Button label="Cancel" onClick={toggleIsCreatingRecipe} emoji="❌" />
+                            <EmojiButton
+                                label="Create"
+                                onClick={() => toggleIsCreatingRecipe() ^ home.create?.recipe(recipeForCreation)}
+                                emoji="💾"
+                            />
+                            <EmojiButton
+                                label="Cancel"
+                                onClick={toggleIsCreatingRecipe}
+                                emoji="❌"
+                            />
                         </RecipeCreationButtons>
                         <EditableRecipeItem
                             recipe={recipeForCreation}
-                            tags={home.tags}
-                            ingredients={home.ingredients}
-                            patchRecipe={(_, params) => setRecipeForCreation({ ...recipeForCreation, ...params })}
+                            patch={(_, params) => setRecipeForCreation({ ...recipeForCreation, ...params })}
                         />
 
                     </CenteredContainer>
             }
-            <List>
-                {home.recipes.map(recipe => (
+            {
+                home.recipes.map(recipe => (
                     <EditableRecipeItem
+                        key={recipe.id}
                         recipe={recipe}
-                        tags={home.tags}
-                        ingredients={home.ingredients}
-                        patchRecipe={home.patchRecipe}
-                        onDelete={() => home.deleteRecipe(recipe)}
+                        patch={home.patch?.recipe}
                     />
-                ))}
-            </List>
+                ))
+            }
         </Root >
     );
 }

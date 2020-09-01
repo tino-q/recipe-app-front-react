@@ -13,6 +13,10 @@ const Background = styled.div`
   height: 4rem;
 `;
 
+const ProfileIcon = styled.div`
+  color: ${({ theme }) => theme?.theme?.accentColor};
+`;
+
 const Container = styled.div`
   display: flex;
   justify-content: space-evenly;
@@ -21,11 +25,14 @@ const Container = styled.div`
 `;
 
 const Banner = styled.div`
+  cursor: pointer;
   font-size: 40px;
+  color: ${({ theme }) => theme?.theme?.accentColor};
 `;
 
 const UserName = styled.div`
   font-size: 16px;
+  color: ${({ theme }) => theme?.theme?.accentColor};
 `;
 
 
@@ -50,16 +57,16 @@ const NavBar = () => {
   }
 
   const onClickHome = () => {
-    history.push('/');
+    history.push('/recipes');
     handleClose();
   }
 
   return (
     <Background>
       <Container>
-        <Banner>Recipes!</Banner>
+        <Banner onClick={onClickHome}>Recipes!</Banner>
         {auth.me && (
-          <div>
+          <ProfileIcon data-testid='navbar-profile-icon'>
             <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"
@@ -90,7 +97,7 @@ const NavBar = () => {
               <MenuItem onClick={onClickProfile}>Profile</MenuItem>
               <MenuItem onClick={onClickLogOut}>Log out</MenuItem>
             </Menu>
-          </div>
+          </ProfileIcon>
         )}
       </Container>
     </Background>

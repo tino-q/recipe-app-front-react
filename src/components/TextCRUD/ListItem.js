@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import useToggleState from '@hooks/useToggleState';
-import Emoji from '@components/Emoji';
+import EmojiButton from '@components/EmojiButton';
 import TextEditor from './TextEditor';
 
 const Container = styled.li`
@@ -20,25 +20,21 @@ const Text = styled.div`
     word-break: break-all;
     margin: 10px;
     flex-grow: 1;
+    color: ${props => props.theme?.theme?.accentColor};
 `;
-
-// const TextButton = styled.div`
-//     font-size: 20px;
-//     border: transparent solid 1px;
-//     &:hover {
-//         border: ${props => props.theme.darkBlue} solid 1px;
-//         border-radius: 4px;
-//     }
-// `;
 
 const ButtonsContainer = styled.div`
-    display: flex;
+    display: ${({ isHovering }) => isHovering ? 'inline' : 'none'};
 `;
-
 
 const ListItem = ({ name, onDelete, onEdit }) => {
     const [isEditing, toggleIsEditing] = useToggleState(false);
-    return <Container>
+    const [isHovering, setIsHovering] = useToggleState(false);
+
+    return <Container
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+    >
         {
             !isEditing ?
                 <Text onDoubleClick={toggleIsEditing}>{name}</Text> :
@@ -48,9 +44,9 @@ const ListItem = ({ name, onDelete, onEdit }) => {
                     value={name}
                 />
         }
-        <ButtonsContainer>
-            <Emoji label="Edit" onClick={toggleIsEditing} emoji="📝" />
-            <Emoji label="Delete" onClick={onDelete} emoji="🗑️" />
+        <ButtonsContainer isHovering={isHovering}>
+            <EmojiButton label="Edit" onClick={toggleIsEditing} emoji="📝" />
+            <EmojiButton label="Delete" onClick={onDelete} emoji="🗑️" />
         </ButtonsContainer>
     </Container>
 }

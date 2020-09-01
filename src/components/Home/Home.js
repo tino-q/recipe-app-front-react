@@ -2,8 +2,10 @@ import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { AuthContext } from '@contexts/AuthContext';
+import { HomeContext } from '@contexts/HomeContext';
 import { TABS } from '@contexts/HomeContext';
 import Spinner from '@components/Spinner';
+import TextDialog from '@components/TextDialog';
 import styled from 'styled-components';
 
 const Tabs = styled.div`
@@ -22,7 +24,8 @@ const Tab = styled.div`
   &:not(:hover) {
     text-decoration: ${ ({ selected }) => selected ? 'underline' : 'none'};
   }
-  border: ${ ({ selected }) => selected ? 'white' : 'transparent'} solid 2px;
+  color:  ${ ({ theme }) => theme?.theme?.accentColor};
+  border: ${ ({ selected, theme }) => selected ? theme?.theme?.accentColor : 'transparent'} solid 2px;
   border-radius: 5px;
 `;
 
@@ -40,12 +43,12 @@ const ModuleContainer = styled.div`
   justify-content: center;
 `;
 
-
-const Home = (props) => {
+const Home = ({ selectedTab }) => {
   const history = useHistory();
   const auth = useContext(AuthContext);
+  const home = useContext(HomeContext);
 
-  if (auth.loading) {
+  if (auth.loading || home.loading) {
     return <Spinner />
   }
 
@@ -53,27 +56,30 @@ const Home = (props) => {
     return <Redirect to={{ pathname: '/login' }} />;
   }
 
-  const currentTab = Object.values(TABS).find(tab => tab.path === props.match.path);
-  if (!currentTab?.Component) {
-    return <div>ERROR</div>
-  }
+  const Module = TABS[selectedTab].Component;
 
-  const CurrentModule = currentTab.Component;
   return (
     <Container>
+      {
+        home.error && <TextDialog
+          open={Boolean(home.error)}
+          onClose={home.clearError}
+          text={home.error?.displayText || home.error}
+        />
+      }
       <Tabs>
         {
           Object.entries(TABS).map(([tabKey, tab]) =>
             <Tab
-              onClick={() => history.push(tab.path)}
               key={tabKey}
-              selected={props.match.path === tab.path}>{tab.text}
+              onClick={() => history.push(tab.path)}
+              selected={tabKey === selectedTab}>{tab.text}
             </Tab>
           )
         }
       </Tabs>
       <ModuleContainer>
-        <CurrentModule />
+        <Module />
       </ModuleContainer>
     </Container >
   );

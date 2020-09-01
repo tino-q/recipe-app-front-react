@@ -12,10 +12,10 @@ const Tags = () => {
 
     return <TextCRUD
         items={home.tags}
-        onCreate={home.createTag}
-        onDelete={home.deleteTag}
-        onRefresh={home.fetchTags}
-        onEdit={home.editTag}
+        onCreate={home.create?.tag}
+        onDelete={home.destroy?.tag}
+        onRefresh={home.fetch?.tags}
+        onEdit={(tag, name) => home.patch.tag(tag, { name })}
         placeholder='eg: vegan'
         tag='tag'
     />

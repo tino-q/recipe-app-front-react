@@ -1,74 +1,69 @@
-import React, { createContext, useReducer, useEffect } from 'react';
-import * as recipes from '@services/recipes';
-import { authReducer, authActions } from '@reducers/auth';
+import React, { createContext, useState, useEffect } from 'react';
+import { useHistory } from "react-router-dom";
+
+// import { authReducer, authActions } from '@reducers/auth';
+import * as backend from '@services/recipes';
+import useLoadingState from '@hooks/useLoadingState';
+// import history from '@components/App/history';
 
 export const AuthContext = createContext();
 
 export function AuthProvider(props) {
-    const token = window.localStorage.getItem('token');
-    const [state, dispatch] = useReducer(authReducer, {
-        token,
+    const history = useHistory();
+    const [state, setState] = useState({
+        token: window.localStorage.getItem('token'),
         me: null,
-        error: null,
-        loading: Boolean(token),
     });
 
-    const refreshAuth = token => recipes.getMe(token)
-        .then(me => dispatch(authActions.setAuth(token, me)))
-        .then(() => dispatch(authActions.setLoading(false)))
-        .catch(e => dispatch(authActions.loginError(e)))
+
+    const { loading, whileLoading, error, clearError } = useLoadingState(false);
 
     const logIn = (email, password) => {
-        dispatch(authActions.setLoading(true));
-        recipes.logIn(email, password)
-            .then(token => {
-                window.localStorage.setItem('token', token);
-                return token;
-            })
-            .then(refreshAuth);
+        whileLoading(async () => {
+            const token = await backend.logIn(email, password);
+            const me = await backend.getMe(token);
+            window.localStorage.setItem('token', token);
+            setState({ token, me });
+        })
     };
 
-    const changeName = newName => {
-        dispatch(authActions.setLoading(true));
-        recipes.changeName(token, newName)
-            .then(me => dispatch(authActions.setAuth(token, me)))
-            .then(() => dispatch(authActions.setLoading(false)));
-    }
+    const patchMeField = field => value => whileLoading(async () => {
+        const me = await backend.patchMe(state.token, { [field]: value });
+        setState({ ...state, me });
+    });
 
-    const changeEmail = newEmail => {
-        dispatch(authActions.setLoading(true));
-        recipes.changeEmail(token, newEmail)
-            .then(me => dispatch(authActions.setAuth(token, me)))
-            .then(() => dispatch(authActions.setLoading(false)));
-    }
+    const logOut = () => whileLoading(() => {
+        window.localStorage.removeItem('token');
+        setState({});
+    });
 
-    const changePassword = newPassword => {
-        dispatch(authActions.setLoading(true));
-        recipes.changePassword(token, newPassword)
-            .then(me => dispatch(authActions.setAuth(token, me)))
-            .then(() => dispatch(authActions.setLoading(false)));
-    }
+    const signUp = (name, email, password) => whileLoading(
+        async () => backend.signUp(name, email, password)
+            .then(() => history.push({ pathname: '/login', state: { email } }))
+    );
+
 
     useEffect(() => {
-        if (!state.me && state.token) {
-            refreshAuth(state.token)
+        if (!error && state.token && !state.me && !loading) {
+            whileLoading(async () => {
+                const { name, email } = await backend.getMe(state.token);
+                setState({ ...state, me: { name, email } });
+            });
         }
-    })
-
-    const logOut = () => {
-        window.localStorage.removeItem('token');
-        dispatch(authActions.logOut());
-    }
+    }, [error, state.token, state.me, loading, whileLoading])
 
     return (
         <AuthContext.Provider value={{
             ...state,
+            loading,
+            error,
             logIn,
             logOut,
-            dispatch,
-            changeName,
-            changeEmail,
-            changePassword
+            signUp,
+            changeName: patchMeField('name'),
+            changeEmail: patchMeField('email'),
+            changePassword: patchMeField('password'),
+            clearError
         }}>
             {props.children}
         </AuthContext.Provider>

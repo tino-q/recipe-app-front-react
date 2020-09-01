@@ -12,10 +12,12 @@ const Ingredients = () => {
 
     return <TextCRUD
         tag={'ingredient'}
-        onCreate={home.createIngredient}
-        onDelete={home.deleteIngredient}
+        onCreate={home.create?.ingredient}
+        onDelete={home.destroy?.ingredient}
         items={home.ingredients}
         placeholder={'eg: carrots'}
+        onEdit={(ingredient, name) => home.patch?.ingredient(ingredient, { name })}
+        onRefresh={home.fetch?.ingredients}
     />
 }
 

@@ -1,21 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import useInputState from '@hooks/useInputState';
-import Emoji from '@components/Emoji';
+import EmojiButton from '@components/EmojiButton';
 
 const Input = styled.input`
     flex-grow: 1;
 `;
-
-// const TextButton = styled.div`
-//     font-size: 20px;
-//     border: transparent solid 1px;
-//     &:hover {
-//         border: ${props => props.theme.darkBlue} solid 1px;
-//         border-radius: 4px;
-//     }
-// `;
-// 
 
 const EditorContainer = styled.div`
     display: flex;
@@ -29,7 +19,6 @@ const EditorContainer = styled.div`
 const ButtonContainer = styled.div`
     display: flex;
 `;
-
 
 const TextEditor = ({ placeholder, onSubmit, onCancel, value = '', password }) => {
     const [editorValue, editorValueChanged] = useInputState(value);
@@ -49,14 +38,12 @@ const TextEditor = ({ placeholder, onSubmit, onCancel, value = '', password }) =
                 ref={inputRef}
             />
             <ButtonContainer>
-                <Emoji label="OK" onClick={() => editorValue && onSubmit(editorValue)} emoji="✅" />
-                <Emoji label="Cancel" onClick={onCancel} emoji="❌" />
+                <EmojiButton label="OK" onClick={() => editorValue && onSubmit(editorValue)} emoji="✅" />
+                <EmojiButton label="Cancel" onClick={onCancel} emoji="❌" />
             </ButtonContainer>
         </EditorContainer >
     );
 }
-
-
 
 
 export default React.memo(TextEditor);

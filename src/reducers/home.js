@@ -1,36 +1,7 @@
 
 export function homeReducer(state, action) {
     switch (action.type) {
-        case 'SET_LOADING':
-            return {
-                ...state,
-                loading: action.loading,
-            }
-
-        case 'SET_RECIPES':
-            return {
-                ...state,
-                recipes: action.recipes,
-            }
-        case 'SET_INGREDIENTS': {
-            return {
-                ...state,
-                ingredients: action.ingredients,
-            }
-        }
-        case 'SET_TAGS': {
-            return {
-                ...state,
-                tags: action.tags,
-            }
-        }
-        case 'SET_ERROR': {
-            return {
-                ...state,
-                error: action.error,
-            }
-        }
-        case 'SET_ALL': {
+        case 'SET_ALL':
             return {
                 ...state,
                 ingredients: action.ingredients,
@@ -38,86 +9,41 @@ export function homeReducer(state, action) {
                 tags: action.tags,
                 error: null,
             }
-        }
-        case 'INGREDIENT_CREATED': {
+        case 'SET_MODEL_OBJECTS':
             return {
                 ...state,
-                ingredients: [...state.ingredients, action.ingredient],
+                [action.modelName]: action.modelObjects,
+            }
+        case 'MODEL_CREATED':
+            return {
+                ...state,
+                [action.modelName]: [...state[action.modelName], action.modelObject],
                 error: null,
             }
-        }
-        case 'TAG_CREATED': {
+        case 'MODEL_DELETED':
             return {
                 ...state,
-                tags: [...state.tags, action.tag],
+                [action.modelName]: state[action.modelName].filter(i => i.id !== action.modelObjectId),
                 error: null,
             }
-        }
-        case 'TAG_DELETED': {
+        case 'MODEL_PATCHED':
             return {
                 ...state,
-                tags: state.tags.filter(tag => tag.id !== action.tagId),
-                error: null,
-            }
-        }
-        case 'TAG_UPDATED': {
-            return {
-                ...state,
-                tags: state.tags.map(tag => (tag.id === action.updatedTag.id) ?
-                    ({ ...tag, name: action.updatedTag.name }) :
-                    ({ ...tag })
+                [action.modelName]: state[action.modelName].map(
+                    i => i.id === action.modelObject.id ? action.modelObject : i
                 ),
                 error: null,
             }
-        }
-        case 'INGREDIENT_DELETED': {
-            return {
-                ...state,
-                ingredients: state.ingredients.filter(i => i.id !== action.ingredientId),
-                error: null,
-            }
-        }
-        case 'RECIPE_UPDATED': {
-            return {
-                ...state,
-                recipes: state.recipes.map(
-                    recipe => recipe.id === action.updatedRecipe.id ? action.updatedRecipe : recipe
-                ),
-                error: null,
-            }
-        }
-        case 'RECIPE_DELETED': {
-            return {
-                ...state,
-                recipes: state.recipes.filter(recipe => recipe.id !== action.recipeId),
-                error: null,
-            }
-        }
-        case 'RECIPE_CREATED': {
-            return {
-                ...state,
-                recipes: [...state.recipes, action.recipe],
-                error: null,
-            }
-        }
         default:
             throw new Error(`Unknown homeReducer action ${action.type}`);
     }
 }
 
 export const homeActions = {
-    setRecipes: (recipes) => ({ type: 'SET_RECIPES', recipes }),
-    setIngredients: (ingredients) => ({ type: 'SET_INGREDIENTS', ingredients }),
-    setTags: (tags) => ({ type: 'SET_TAGS', tags }),
-    setLoading: (loading) => ({ type: 'SET_LOADING', loading }),
-    setError: (error) => ({ type: 'SET_ERROR', error }),
     setAll: (recipes, tags, ingredients) => ({ type: 'SET_ALL', recipes, ingredients, tags }),
-    tagCreated: tag => ({ type: 'TAG_CREATED', tag }),
-    tagDeleted: tagId => ({ type: 'TAG_DELETED', tagId }),
-    ingredientCreated: ingredient => ({ type: 'INGREDIENT_CREATED', ingredient }),
-    ingredientDeleted: ingredientId => ({ type: 'INGREDIENT_DELETED', ingredientId }),
-    tagUpdated: updatedTag => ({ type: 'TAG_UPDATED', updatedTag }),
-    recipeUpdated: updatedRecipe => ({ type: 'RECIPE_UPDATED', updatedRecipe }),
-    recipeDeleted: recipeId => ({ type: 'RECIPE_DELETED', recipeId }),
-    recipeCreated: recipe => ({ type: 'RECIPE_CREATED', recipe }),
+    set: (modelName, modelObjects) => ({ type: 'SET_MODEL_OBJECTS', modelName, modelObjects }),
+
+    patched: (modelName, modelObject) => ({ modelName, modelObject, type: 'MODEL_PATCHED' }),
+    deleted: (modelName, modelObjectId) => ({ modelName, modelObjectId, type: 'MODEL_DELETED' }),
+    created: (modelName, modelObject) => ({ modelName, modelObject, type: 'MODEL_CREATED' }),
 };

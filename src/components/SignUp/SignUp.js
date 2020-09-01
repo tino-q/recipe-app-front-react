@@ -1,11 +1,11 @@
 import React, { memo, useContext } from 'react';
 import styled from 'styled-components';
 import useInputState from '@hooks/useInputState';
-import * as recipes from '@services/recipes';
-import { useHistory } from "react-router-dom";
+import TextDialog from "@components/TextDialog";
+import Button from "@components/Button";
 import { AuthContext } from "@contexts/AuthContext";
-import { authActions } from "@reducers/auth";
 import { Redirect, Link } from 'react-router-dom';
+import Spinner from '@components/Spinner';
 
 const CenteredContainer = styled.div`
   display: flex;
@@ -16,6 +16,7 @@ const CenteredContainer = styled.div`
 const Banner = styled.div`
   margin: 10px;
   text-align: center;
+  color: ${props => props.theme?.theme?.accentColor};
 `;
 
 const Input = styled.input`
@@ -27,40 +28,44 @@ const LinkToLogin = styled(Link)`
   font-size: 12px;
 `;
 
-const SignUp = () => {
-  const history = useHistory();
-  const auth = useContext(AuthContext);
-  const [name, onNameChange] = useInputState('Martin Queija');
-  const [email, onEmailChange] = useInputState('user@travelperk.com');
-  const [password, onPasswordChange] = useInputState('password123');
+const SignUpButton = styled(Button)`
+  margin-top: 10px;
+`;
 
-  const onSubmitForm = e => {
-    e.preventDefault();
-    recipes.signUp(name, email, password)
-      .then(({ email }) => {
-        auth.dispatch(authActions.signedUp());
-        history.push({ pathname: 'login', state: { email } });
-      })
-      .catch(alert);
-  };
+const SignUp = () => {
+  const auth = useContext(AuthContext);
+  const [name, onNameChange] = useInputState('');
+  const [email, onEmailChange] = useInputState('');
+  const [password, onPasswordChange] = useInputState('');
+
+  const onSubmit = e => e.preventDefault() ^ auth.signUp(name, email, password);
 
   if (auth.me) {
     return <Redirect to={{ pathname: '/recipes' }} />
+  } else if (auth.loading) {
+    return <Spinner />
   }
 
   return (
     <CenteredContainer>
+      {
+        auth.error && <TextDialog
+          open={Boolean(auth.error)}
+          onClose={auth.clearError}
+          text={auth.error?.displayText}
+        />
+      }
       <Banner>Sign up to enjoy the best recipe management app!</Banner>
-      <form onSubmit={onSubmitForm}>
+      <form onSubmit={onSubmit}>
         <CenteredContainer>
           <Input type="text" name="name" value={name} onChange={onNameChange} placeholder="name" />
           <Input type="text" name="email" value={email} onChange={onEmailChange} placeholder="email" />
           <Input type="password" name="password" value={password} onChange={onPasswordChange} placeholder="password" />
-          <Input type="submit" value="Confirm" disabled={!(name && password && email)} />
+          <SignUpButton data-testid="signup-button" onClick={onSubmit} type="submit" disabled={!(name && password && email)}>Sign Up</SignUpButton>
           <LinkToLogin to="/login">Have an account already? Log in.</LinkToLogin>
         </CenteredContainer>
       </form>
-    </CenteredContainer>
+    </CenteredContainer >
   );
 }
 

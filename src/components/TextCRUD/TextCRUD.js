@@ -3,6 +3,7 @@ import ListItem from './ListItem';
 import TextEditor from './TextEditor';
 import styled from 'styled-components';
 import useToggleState from '@hooks/useToggleState';
+import Button from '@components/Button';
 
 const List = styled.div`
     display: flex;
@@ -11,8 +12,6 @@ const List = styled.div`
 
 const Container = styled.div`
     display: flex;
-    min-height: 25px;
-    margin-top: 25px;
     width: 100%;
     justify-content: center;
 `;
@@ -27,9 +26,14 @@ const Root = styled.div`
 
 const CenteredContainer = styled.div`
     display: flex;
-    min-height: 25px;
     width: 100%;
     justify-content: center;
+`;
+
+const ButtonContainer = styled.div`
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
 `;
 
 const TextCRUD = ({ tag, items, onCreate, onEdit, placeholder, onDelete, onRefresh }) => {
@@ -40,12 +44,11 @@ const TextCRUD = ({ tag, items, onCreate, onEdit, placeholder, onDelete, onRefre
                 <CenteredContainer>
                     {
                         !isEditing ?
-                            <div style={{ width: "100%", display: 'flex', justifyContent: 'space-between' }}>
-                                <button onClick={onRefresh}>Refresh</button>
-                                <button onClick={toggleIsEditing}>{`Create new ${tag}`}</button>
-                            </div> :
+                            <ButtonContainer>
+                                <Button onClick={onRefresh}>Refresh</Button>
+                                <Button onClick={toggleIsEditing}>{`Create new ${tag}`}</Button>
+                            </ButtonContainer> :
                             <TextEditor
-                                tag={tag}
                                 onSubmit={onCreate}
                                 placeholder={placeholder}
                                 onCancel={toggleIsEditing}

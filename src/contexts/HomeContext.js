@@ -1,23 +1,25 @@
 import React, { createContext, useReducer, useEffect, useContext } from 'react';
 import { homeReducer, homeActions } from '@reducers/home';
-import * as recipes from '@services/recipes';
+import * as backend from '@services/recipes';
 import RecipesCRUD from '@components/RecipesCRUD';
 import { AuthContext } from '@contexts/AuthContext';
 import Tags from '@components/Tags';
 import Ingredients from '@components/Ingredients';
+import useLoadingState from '@hooks/useLoadingState';
+
 
 export const TABS = {
-    RECIPES: {
+    recipes: {
         path: '/recipes',
         text: 'Recipes',
         Component: RecipesCRUD,
     },
-    INGREDIENTS: {
+    ingredients: {
         path: '/ingredients',
         text: 'Ingredients',
         Component: Ingredients,
     },
-    TAGS: {
+    tags: {
         path: '/tags',
         text: 'Tags',
         Component: Tags,
@@ -28,110 +30,85 @@ export const HomeContext = createContext();
 
 export function HomeProvider(props) {
     const auth = useContext(AuthContext);
-
+    const { loading, whileLoading, error, clearError } = useLoadingState(false);
     const [state, dispatch] = useReducer(homeReducer, {
-        loading: false,
         recipes: null,
         tags: null,
         ingredients: null,
     });
 
-    const doWhileLoading = (promiseFn) =>
-        Promise.resolve(dispatch(homeActions.setLoading(true)))
-            .then(promiseFn)
-            .then(() => dispatch(homeActions.setLoading(false)))
-            .catch(error => dispatch(homeActions.setError(error)))
-
-    const fetchRecipes = () => doWhileLoading(
-        () => recipes.getRecipes(auth.token)
-            .then(recipes => dispatch(homeActions.setRecipes(recipes)))
+    const fetch = (modelName) => () => whileLoading(
+        () => backend.get(auth.token, modelName)
+            .then(modelObjects => dispatch(homeActions.set(modelName, modelObjects)))
     );
 
-    const fetchIngredients = () => doWhileLoading(
-        () => recipes.getIngredients(auth.token)
-            .then(ingredients => dispatch(homeActions.setIngredients(ingredients)))
+    const create = modelName => modelObject => whileLoading(
+        () => backend.create(auth.token, modelName, modelObject)
+            .then((createdObject) => dispatch(homeActions.created(modelName, createdObject)))
     );
 
-    const fetchTags = () => doWhileLoading(
-        () => recipes.getTags(auth.token)
-            .then(tags => dispatch(homeActions.setTags(tags)))
+    const destroy = modelName => modelObject => whileLoading(
+        () => backend.destroy(auth.token, modelName, modelObject.id)
+            .then(() => dispatch(homeActions.deleted(modelName, modelObject.id)))
     );
 
-    const createTag = (name) => doWhileLoading(
-        () => recipes.createTag(auth.token, name)
-            .then(tag => dispatch(homeActions.tagCreated(tag)))
+    const patch = modelName => (i, params) => whileLoading(
+        () => backend.patch(auth.token, modelName, i.id, params)
+            .then(patched => dispatch(homeActions.patched(modelName, patched)))
     );
-
-    const deleteTag = (tag) => doWhileLoading(
-        () => recipes.deleteTag(auth.token, tag.id)
-            .then(() => dispatch(homeActions.tagDeleted(tag.id)))
-    );
-
-    const createIngredient = (name) => doWhileLoading(
-        () => recipes.createIngredient(auth.token, name)
-            .then(ingredient => dispatch(homeActions.ingredientCreated(ingredient)))
-    );
-
-    const deleteIngredient = ingredient => doWhileLoading(
-        () => recipes.deleteIngredient(auth.token, ingredient.id)
-            .then(() => dispatch(homeActions.ingredientDeleted(ingredient.id)))
-    );
-
-    const editTag = (tag, newValue) => doWhileLoading(
-        () => recipes.editTag(auth.token, tag.id, newValue)
-            .then(updatedTag => dispatch(homeActions.tagUpdated(updatedTag)))
-    );
-
-    const fetchAll = token => doWhileLoading(
-        () => Promise.all([
-            recipes.getRecipes(token),
-            recipes.getTags(token),
-            recipes.getIngredients(token),
-        ]).then(([recipes, tags, ingredients]) => {
-            dispatch(homeActions.setAll(recipes, tags, ingredients));
-        })
-    );
-
-
-
-    const patchRecipe = (recipe, params) =>
-        doWhileLoading(() => recipes.patchRecipe(auth.token, recipe.id, params)
-            .then(updatedRecipe => dispatch(homeActions.recipeUpdated(updatedRecipe))));
-
-    const deleteRecipe = recipe =>
-        doWhileLoading(() => recipes.deleteRecipe(auth.token, recipe.id)
-            .then(() => dispatch(homeActions.recipeDeleted(recipe.id))));
-
-    const createRecipe = recipe => doWhileLoading(() => recipes.createRecipe(auth.token, recipe)
-        .then((createdRecipe) => dispatch(homeActions.recipeCreated(createdRecipe))))
 
     useEffect(() => {
         if (
             auth.token &&
-            !state.loading &&
+            auth.me &&
+            !loading &&
             state.recipes === null &&
             state.ingredients === null &&
             state.tags === null
-        )
-            fetchAll(auth.token);
-    });
+        ) {
+            whileLoading(
+                () => Promise.all([
+                    backend.get(auth.token, 'recipes'),
+                    backend.get(auth.token, 'tags'),
+                    backend.get(auth.token, 'ingredients'),
+                ]).then(([recipes, tags, ingredients]) => {
+                    dispatch(homeActions.setAll(recipes, tags, ingredients));
+                })
+            );
+        }
+    }, [auth.me, auth.token, loading, state.recipes, state.ingredients, state.tags, whileLoading]);
 
     return (
         <HomeContext.Provider value={{
             ...state,
-            dispatch,
-            fetchAll,
-            fetchRecipes,
-            fetchIngredients,
-            fetchTags,
-            createTag,
-            createIngredient,
-            deleteTag,
-            deleteIngredient,
-            editTag,
-            patchRecipe,
-            deleteRecipe,
-            createRecipe
+            loading,
+            error,
+            clearError,
+            fetch: {
+                recipes: fetch('recipes'),
+                ingredients: fetch('ingredients'),
+                tags: fetch('tags'),
+            },
+
+            create: {
+                ingredient: name => create('ingredients')({ name }),
+                tag: name => create('tags')({ name }),
+                recipe: create('recipes'),
+            },
+
+            destroy: {
+                ingredient: destroy('ingredients'),
+                recipe: destroy('recipes'),
+                tag: destroy('tags'),
+            },
+
+
+            patch: {
+                ingredient: patch('ingredients'),
+                recipe: patch('recipes'),
+                tag: patch('tags'),
+            }
+
         }}>
             {props.children}
         </HomeContext.Provider>

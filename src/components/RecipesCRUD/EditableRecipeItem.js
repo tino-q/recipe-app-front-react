@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 import useToggleState from '@hooks/useToggleState';
 import TextEditor from '@components/TextCRUD/TextEditor';
-import Emoji from '@components/Emoji';
+import { HomeContext } from '@contexts/HomeContext';
+import EmojiButton from '@components/EmojiButton';
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
 
@@ -20,6 +21,7 @@ const Text = styled.div`
     overflow-wrap: break-word;
     word-break: break-all;
     margin: 10px;
+    color: ${props => props.theme?.theme?.accentColor};
 `;
 
 
@@ -51,13 +53,6 @@ const DeleteButtonRow = styled.div`
     justify-content: flex-end;
 `;
 
-const DeleteButton = styled(Emoji)`
-    &:hover {
-        cursor: pointer;
-    }
-`;
-
-
 const RecipeTextRow = ({ label, value, onEdit }) => {
     const [isEditing, toggleIsEditing] = useToggleState(false);
     return (
@@ -67,10 +62,13 @@ const RecipeTextRow = ({ label, value, onEdit }) => {
                 !isEditing ?
                     <RecipeTextRowControlButtons>
                         <Text onDoubleClick={toggleIsEditing}>{value}</Text>
-                        <Emoji label="Edit" onClick={toggleIsEditing} emoji="📝" />
+                        <EmojiButton label="Edit" onClick={toggleIsEditing} emoji="📝" />
                     </RecipeTextRowControlButtons> :
                     <TextEditor
-                        onSubmit={onEdit}
+                        onSubmit={(value) => {
+                            toggleIsEditing();
+                            onEdit(value);
+                        }}
                         value={value}
                         onCancel={toggleIsEditing}
                     />
@@ -99,50 +97,52 @@ const MultipleSelector = ({ ids, set, label, onUpdateSelected }) => {
 }
 
 
-const EditableRecipeItem = ({ recipe, tags, ingredients, patchRecipe, onDelete }) => {
+const EditableRecipeItem = ({ recipe, patch }) => {
+    const home = useContext(HomeContext);
+    const { tags, ingredients } = home;
     return (
         <RecipeContainer>
             <RecipeTextRow
                 label="title:"
                 value={recipe.title}
-                onEdit={title => patchRecipe(recipe, { title })}
+                onEdit={title => patch(recipe, { title })}
                 onCancel={alert}
             />
             <RecipeTextRow
                 label="minutes:"
                 value={recipe.time_minutes}
-                onEdit={time_minutes => patchRecipe(recipe, { time_minutes })}
+                onEdit={time_minutes => patch(recipe, { time_minutes })}
                 onCancel={alert}
             />
             <RecipeTextRow
                 label="price:"
                 value={recipe.price}
-                onEdit={price => patchRecipe(recipe, { price })}
+                onEdit={price => patch(recipe, { price })}
                 onCancel={alert}
             />
             <RecipeTextRow
                 label="link:"
                 value={recipe.link}
-                onEdit={link => patchRecipe(recipe, { link })}
+                onEdit={link => patch(recipe, { link })}
                 onCancel={alert}
             />
             <MultipleSelector
                 label="tags:"
-                onUpdateSelected={tags => patchRecipe(recipe, { tags })}
+                onUpdateSelected={tags => patch(recipe, { tags })}
                 set={tags}
                 ids={recipe.tags}
             />
             <MultipleSelector
                 label="ingredients:"
-                onUpdateSelected={ingredients => patchRecipe(recipe, { ingredients })}
+                onUpdateSelected={ingredients => patch(recipe, { ingredients })}
                 set={ingredients}
                 ids={recipe.ingredients}
             />
             {
-                onDelete &&
+                recipe.id &&
                 <Row>
                     <DeleteButtonRow>
-                        <DeleteButton label="Delete" onClick={onDelete} emoji="🗑️" />
+                        <EmojiButton label="Delete" onClick={() => home.destroy.recipe(recipe)} emoji="🗑️" />
                     </DeleteButtonRow>
                 </Row>
             }

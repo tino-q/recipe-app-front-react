@@ -4,6 +4,7 @@ import useInputState from '@hooks/useInputState';
 import { AuthContext } from "@contexts/AuthContext";
 import { Redirect, Link } from 'react-router-dom';
 import Spinner from '@components/Spinner';
+import Button from '@components/Button';
 import ERRORS from '@errors';
 
 const CenteredContainer = styled.div`
@@ -15,6 +16,7 @@ const CenteredContainer = styled.div`
 
 const Banner = styled.div`
   margin-top: 10px;
+  color: ${props => props.theme?.theme?.accentColor};
 `;
 
 const Input = styled.input`
@@ -24,11 +26,16 @@ const Input = styled.input`
 const ErrorMessage = styled.div`
   margin-top: 10px;
   display: ${props => props.error ? 'inline' : 'none'};
+  color: ${props => props.theme?.theme?.accentColor};
 `;
 
 const LinkToSignUp = styled(Link)`
   margin-top: 10px;
   font-size: 12px;
+`;
+
+const LoginButton = styled(Button)`
+  margin-top: 10px;
 `;
 
 const Login = (props) => {
@@ -42,16 +49,18 @@ const Login = (props) => {
     return <Spinner />
   }
 
+  const onSubmit = e => e.preventDefault() ^ auth.logIn(email, password);
+
   return (
     <CenteredContainer>
       <Banner>Log in with your credentials</Banner>
-      <form onSubmit={e => e.preventDefault() ^ auth.logIn(email, password)}>
+      <form>
         <CenteredContainer>
           <Input type="text" name="email" value={email} onChange={onEmailChange} placeholder="email" />
           <Input type="password" name="password" value={password} onChange={onPasswordChange} placeholder="password" />
-          <Input type="submit" value="Confirm" disabled={!(password && email)} />
+          <LoginButton onClick={onSubmit} disabled={!(password && email)}>Confirm</LoginButton>
           <LinkToSignUp to="/signup">Don't have an account? Sign up for free</LinkToSignUp>
-          <ErrorMessage error={auth.error === ERRORS.INVALID_CREDENTIALS}>Oh snap, that's no good. Try again</ErrorMessage>
+          <ErrorMessage data-testid="asdf" error={auth.error?.type === ERRORS.INVALID_CREDENTIALS}>Oh snap, that's no good. Try again</ErrorMessage>
         </CenteredContainer>
       </form>
     </CenteredContainer >

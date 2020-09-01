@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components';
 
 const Spinner = styled.div`
@@ -67,4 +68,4 @@ animation-delay: -0.16s;
 `;
 
 
-export default Spinner;
+export default () => (<Spinner data-testid="spinner" />);

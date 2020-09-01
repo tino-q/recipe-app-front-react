@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { AuthContext } from '@contexts/AuthContext';
 import TextEditor from '@components/TextCRUD/TextEditor';
 import Spinner from '@components/Spinner';
-import Emoji from '@components/Emoji';
+import EmojiButton from '@components/EmojiButton';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 
@@ -27,6 +27,7 @@ const RowContainer = styled.div`
 `;
 
 const Text = styled.div`
+  color: ${props => props.theme?.theme?.accentColor}
 `;
 
 const EditableValueContainer = styled.div`
@@ -40,7 +41,7 @@ const LinkToHome = styled(Link)`
   font-size: 20px;
 `;
 
-const EditButton = styled(Emoji)`
+const EditButton = styled(EmojiButton)`
   margin-left: 5px;
 `;
 
@@ -49,7 +50,7 @@ const Row = (props) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
     <RowContainer>
-      <div>{props.header}</div>
+      <Text>{props.header}</Text>
       {
         !isEditing ?
           <EditableValueContainer>
@@ -105,7 +106,7 @@ const Profile = (props) => {
         onSubmit={auth.changePassword}
         password
       />
-      <LinkToHome to="/">Back to Recipes</LinkToHome>
+      <LinkToHome to="/recipes">Back to Recipes</LinkToHome>
     </ProfileContainer>
   );
 }
